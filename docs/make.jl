@@ -1,14 +1,14 @@
-using RandomFeatures
+using RandomFeatureMaps
 using Documenter
 
-DocMeta.setdocmeta!(RandomFeatures, :DocTestSetup, :(using RandomFeatures); recursive=true)
+DocMeta.setdocmeta!(RandomFeatureMaps, :DocTestSetup, :(using RandomFeatureMaps); recursive=true)
 
 makedocs(;
-    modules=[RandomFeatures],
+    modules=[RandomFeatureMaps],
     authors="murrellb <murrellb@gmail.com> and contributors",
-    sitename="RandomFeatures.jl",
+    sitename="RandomFeatureMaps.jl",
     format=Documenter.HTML(;
-        canonical="https://MurrellGroup.github.io/RandomFeatures.jl",
+        canonical="https://MurrellGroup.github.io/RandomFeatureMaps.jl",
         edit_link="main",
         assets=String[],
     ),
@@ -18,6 +18,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/MurrellGroup/RandomFeatures.jl",
+    repo="github.com/MurrellGroup/RandomFeatureMaps.jl",
     devbranch="main",
 )

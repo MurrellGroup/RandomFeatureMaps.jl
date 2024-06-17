@@ -1,10 +1,10 @@
-name = "RandomFeatures"
-uuid = "73bd944d-2787-4b1c-bb49-32a090f669f3"
+name = "RandomFeatureMaps"
+uuid = "780baa95-dd42-481b-93db-80fe3d88832c"
 authors = ["murrellb <murrellb@gmail.com> and contributors"]
-version = "1.0.0-DEV"
+version = "0.1.0"
 
 [deps]
-Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
 NNlib = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
 Optimisers = "3bd65402-5787-11e9-1adc-39752487f4e2"
 

@@ -23,14 +23,12 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.10'
           - '1.9'
           - 'nightly'
         os:
           - ubuntu-latest
         arch:
           - x64
-          - x86
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
@@ -71,6 +69,6 @@ jobs:
         shell: julia --project=docs --color=yes {0}
         run: |
           using Documenter: DocMeta, doctest
-          using RandomFeatures
-          DocMeta.setdocmeta!(RandomFeatures, :DocTestSetup, :(using RandomFeatures); recursive=true)
-          doctest(RandomFeatures)
+          using RandomFeatureMaps
+          DocMeta.setdocmeta!(RandomFeatureMaps, :DocTestSetup, :(using RandomFeatureMaps); recursive=true)
+          doctest(RandomFeatureMaps)

@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = RandomFeatures
+CurrentModule = RandomFeatureMaps
 ```
 
-# RandomFeatures
+# RandomFeatureMaps
 
-Documentation for [RandomFeatures](https://github.com/MurrellGroup/RandomFeatures.jl).
+Documentation for [RandomFeatureMaps](https://github.com/MurrellGroup/RandomFeatureMaps.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [RandomFeatures]
+Modules = [RandomFeatureMaps]
 ```

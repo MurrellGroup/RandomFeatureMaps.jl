@@ -1,11 +1,12 @@
-using RandomFeatures
+using RandomFeatureMaps
 using Test
 
-@testset "RandomFeatures.jl" begin
-    rff = RandomFourierFeatures(10=>20,0.1f0)
-    x = randn(Float32,10,11,1)
-    @test isapprox(rff(x[:,:]) , rff(x)[:,:,1])
+@testset "RandomFeatureMaps.jl" begin
+    rff = RandomFourierFeatures(10 => 20, 0.1f0)
+    x = randn(Float32, 10, 4)
+    @test rff(x) |> size == (20, 4)
+    @test rff(reshape(x, 10, 2, 2)) |> size == (20, 2, 2)
 
-    rof = RandomOrientationFeatures(16,0.1f0)
-    @test size(rof((randn(3,3,10,1),randn(3,1,10,1)))) == (16, 10, 10, 1)
+    rof = RandomOrientationFeatures(10, 0.1f0)
+    @test rof((randn(Float32, 3, 3, 4, 2), randn(Float32, 3, 1, 4, 2))) |> size == (10, 4, 4, 2)
 end
