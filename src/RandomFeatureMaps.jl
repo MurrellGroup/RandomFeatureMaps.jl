@@ -101,6 +101,9 @@ julia> rof(rigid1, rigid2; pairdim=1) |> size
 julia> using GraphNeuralNetworks
 
 julia> graph = GNNGraph(Bool[1 0; 1 1], graph_type=:dense)
+GNNGraph:
+  num_nodes: 2
+  num_edges: 3
 
 julia> rigid = rand_rigid(Float32, (2,));
 
