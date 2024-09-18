@@ -88,7 +88,7 @@ Each of these have single rigid argument methods for when `rigid1 == rigid2`, i.
 ```jldoctest
 julia> rof = RandomOrientationFeatures(10, 0.1f0);
 
-julia> rigid = rand_rigid(Float32, (2, 3));
+julia> rigid = rand_rigid(Float32, (4, 3));
 
 julia> rof(rigid, rigid) |> size
 (10, 4, 3)
