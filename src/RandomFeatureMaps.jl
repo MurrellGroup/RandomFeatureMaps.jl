@@ -95,7 +95,7 @@ julia> rof(rigid, rigid) |> size
 
 julia> rigid1, rigid2 = rand_rigid(Float32, (4, 2)), rand_rigid(Float32, (3, 2));
 
-julia> rof(rigid1, rigid2; dims=1) |> size
+julia> rof(rigid1, rigid2; pairdim=1) |> size
 (10, 4, 3, 2)
 
 julia> using GraphNeuralNetworks
