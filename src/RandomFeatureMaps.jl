@@ -2,7 +2,6 @@ module RandomFeatureMaps
 
 export RandomFourierFeatures
 export RandomOrientationFeatures
-export pairwiserof
 export rand_rigid, get_rigid
 
 using Functors: @functor
