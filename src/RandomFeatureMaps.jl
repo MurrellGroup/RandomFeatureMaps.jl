@@ -100,11 +100,12 @@ julia> rof(rigid1, rigid2; dims=1) |> size
 
 julia> using GraphNeuralNetworks
 
-julia> graph = GNNGraph(rand(Bool, 4, 4), graph_type=:dense)
+julia> graph = GNNGraph(Bool[1 0; 1 1], graph_type=:dense)
 
-julia> rigid = rand_rigid(Float32, (4,));
+julia> rigid = rand_rigid(Float32, (2,));
 
 julia> rof(rigid, graph) |> size
+(10, 3)
 ```
 """
 struct RandomOrientationFeatures{A<:AbstractArray{<:Real}}

@@ -1,3 +1,4 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+GraphNeuralNetworks = "cffab07f-9bc2-4db1-8861-388f63bf7694"
 RandomFeatureMaps = "780baa95-dd42-481b-93db-80fe3d88832c"
