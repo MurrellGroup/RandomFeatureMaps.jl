@@ -128,7 +128,7 @@ end
 _rof(rof::RandomOrientationFeatures, T1::Rigid, T2::Rigid) = norms(T1(rof.FA) .- T2(rof.FB); dims=1)
 
 function (rof::RandomOrientationFeatures)(T1::Rigid, T2::Rigid; pairdim::Union{Nothing,Int}=nothing)
-    if dims isa Int
+    if pairdim isa Int
         T1, T2 = batchunsqueeze(T1, dims=pairdim+1), batchunsqueeze(T2, dims=pairdim)
     end
     _rof(rof, T1, T2)

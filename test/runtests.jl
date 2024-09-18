@@ -18,8 +18,8 @@ using BatchedTransformations
         k = 5
         rof = RandomOrientationFeatures(dim, 0.1f0)
         rigid = rand_rigid(Float32, (n,k))
-        @test rof(rigid, dims=1) |> size == (dim, n, n, k)
-        @test rof((rand(3,3,n,k), rand(3,1,n,k)), dims=1) |> size == (dim, n, n, k)
+        @test rof(rigid, pairdim=1) |> size == (dim, n, n, k)
+        @test rof((rand(3,3,n,k), rand(3,1,n,k)), pairdim=1) |> size == (dim, n, n, k)
         @test rof(rigid) == rof(rigid, rigid)
     end
 

@@ -9,7 +9,7 @@ using GraphNeuralNetworks
         g = ones(Bool, n, n)
         graph = GNNGraph(g, graph_type=:dense)
         rof = RandomOrientationFeatures(dim, 0.1f0)
-        @test rof(rigid, graph) == reshape(rof(rigid; dims=1), dim, :)
+        @test rof(rigid, graph) == reshape(rof(rigid; pairdim=1), dim, :)
     end
 
     @testset "Random edges" begin
@@ -20,7 +20,7 @@ using GraphNeuralNetworks
         graph = GNNGraph(g, graph_type=:dense)
         rof = RandomOrientationFeatures(dim, 0.1f0)
         @test size(rof(rigid, rigid, graph), 2) == count(g)
-        @test rof(rigid, graph) == reshape(rof(rigid; dims=1), dim, :)[:,findall(vec(g))]
+        @test rof(rigid, graph) == reshape(rof(rigid; pairdim=1), dim, :)[:,findall(vec(g))]
         @test rof(rigid, graph) == rof(rigid, rigid, graph)
     end
 
