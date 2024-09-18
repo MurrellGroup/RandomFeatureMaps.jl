@@ -4,15 +4,15 @@ using RandomFeatureMaps
 using BatchedTransformations
 using GraphNeuralNetworks
 
+using RandomFeatureMaps: norms
+
 subt(xi, xj, e) = xj .- xi
-function (rof::RandomOrientationFeatures)(rigid::Rigid, graph::GNNGraph)
-    points1 = rigid * rof.FA
-    points2 = rigid * rof.FB
-    diffs = apply_edges(subt, graph, xi=points2, xj=points1)
-    return dropdims(sqrt.(sum(abs2, diffs; dims=1)); dims=1)
+function (rof::RandomOrientationFeatures)(T1::Rigid, T2::Rigid, graph::GNNGraph)
+    @assert length(batchsize(linear(T1))) == 1 && batchsize(linear(T1)) == batchsize(linear(T2))
+    diffs = apply_edges(subt, graph, xj=T1(rof.FA), xi=T2(rof.FB))
+    norms(diffs; dims=1)
 end
 
-# deprecated
-(rof::RandomOrientationFeatures)(graph::GNNGraph, rigid) = rof(rigid, graph)
+(rof::RandomOrientationFeatures)(T, graph::GNNGraph) = rof(T, T, graph)
 
 end

@@ -13,9 +13,14 @@ using BatchedTransformations
     end
 
     @testset "RandomOrientationFeatures" begin
-        rof = RandomOrientationFeatures(10, 0.1f0)
-        @test rof(rand_rigid(Float32, (4,2))) |> size == (10, 4, 4, 2)
-        @test rof((rand(3,3,4,2), rand(3,1,4,2))) |> size == (10, 4, 4, 2) # deprecated
+        dim = 10
+        n = 8
+        k = 5
+        rof = RandomOrientationFeatures(dim, 0.1f0)
+        rigid = rand_rigid(Float32, (n,k))
+        @test rof(rigid, dims=1) |> size == (dim, n, n, k)
+        @test rof((rand(3,3,n,k), rand(3,1,n,k)), dims=1) |> size == (dim, n, n, k)
+        @test rof(rigid) == rof(rigid, rigid)
     end
 
     include("GraphNeuralNetworksExt.jl")

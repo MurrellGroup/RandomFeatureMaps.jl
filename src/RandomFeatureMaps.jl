@@ -2,16 +2,23 @@ module RandomFeatureMaps
 
 export RandomFourierFeatures
 export RandomOrientationFeatures
-export rand_rigid, construct_rigid
+export pairwiserof
+export rand_rigid, get_rigid
 
-using Flux: @functor, Optimisers, unsqueeze
+using Functors: @functor
+import Optimisers
 
 using BatchedTransformations
+
+sumdrop(f, A::AbstractArray; dims) = dropdims(sum(f, A; dims); dims)
+norms(A::AbstractArray; dims) = sqrt.(sumdrop(abs2, A; dims))
 
 """
     RandomFourierFeatures(n => m, σ)
 
 Maps `n`-dimensional data and projects it to `m`-dimensional random fourier features.
+
+This type has no trainable parameters.
 
 ## Examples
 
@@ -42,8 +49,8 @@ function RandomFourierFeatures((d1, d2)::Pair{<:Integer, <:Integer}, σ::Abstrac
 end
 
 function (rff::RandomFourierFeatures{T})(X::AbstractMatrix{T}) where T<:Real
-    WtX = rff.W'X
-    return [cos.(WtX); sin.(WtX)]
+    Y = rff.W'X
+    return [cos.(Y); sin.(Y)]
 end
 
 function (rff::RandomFourierFeatures{T})(X::AbstractArray{T}) where T<:Real
@@ -53,32 +60,54 @@ function (rff::RandomFourierFeatures{T})(X::AbstractArray{T}) where T<:Real
     return Y
 end
 
-rand_rigid(T::Type, batch_size::Dims) = rand(T, Rigid, 3, batch_size)
-
-function construct_rigid(R::AbstractArray, t::AbstractArray)
-    batch_size = size(R)[3:end]
-    t = reshape(t, 3, 1, batch_size...)
-    Translation(t) ∘ Rotation(R)
-end
 
 """
     RandomOrientationFeatures
 
-Can be called on rigid transformations to create pairwise maps of random orientation features.
+Holds two random matrices which are used to embed rigid transformations.
+
 This type has no trainable parameters.
+
+## Methods
+
+- `(::RandomOrientationFeatures)(rigid1, rigid2)`: returns the distances between the corresponding
+rigid transformations, embedded using the two random matrices of the random orientation features.
+
+- `(::RandomOrientationFeatures)(rigid1, rigid2; dims::Int)`: unsqueezes batch dimension `dim+1`
+of `rigid1` and `dim` of `rigid2` to broadcast the `rof` call and produce a pairwise map.
+
+- `(::RandomOrientationFeatures)(rigid1, rigid2, graph::GraphNeuralNetworks.GNNGraph)`: similar to
+the first method, but takes two sets rigid transformations of equal size and unrolls a graph to
+get the pairs of rigid transformations. Equivalent to the second method (with broadcasted dimensions
+flattened) when the graph is complete.
+
+Each of these have single rigid argument methods for when `rigid1 == rigid2`, i.e. `rof(rigid)`
 
 ## Examples
 
 ```jldoctest
-julia> rof = RandomOrientationFeatures(4, 0.1);
+julia> rof = RandomOrientationFeatures(10, 0.1f0);
 
-julia> rigid = (randn(3, 3, 2), randn(3, 1, 2)); # cba to make it orthonormal and whatevs
+julia> rigid = rand_rigid(Float32, (2, 3));
 
-julia> rof(rigid) |> size
-(4, 2, 2)
+julia> rof(rigid, rigid) |> size
+(10, 4, 3)
+
+julia> rigid1, rigid2 = rand_rigid(Float32, (4, 2)), rand_rigid(Float32, (3, 2));
+
+julia> rof(rigid1, rigid2; dims=1) |> size
+(10, 4, 3, 2)
+
+julia> using GraphNeuralNetworks
+
+julia> graph = GNNGraph(rand(Bool, 4, 4), graph_type=:dense)
+
+julia> rigid = rand_rigid(Float32, (4,));
+
+julia> rof(rigid, graph) |> size
 ```
 """
-struct RandomOrientationFeatures{T<:Real,A<:AbstractMatrix{T}}
+struct RandomOrientationFeatures{A<:AbstractArray{<:Real}}
     FA::A
     FB::A
 end
@@ -96,13 +125,35 @@ function RandomOrientationFeatures(dim::Integer, σ::AbstractFloat)
     return RandomOrientationFeatures(randn(typeof(σ), 3, dim) * σ, randn(typeof(σ), 3, dim) * σ)
 end
 
-function (rof::RandomOrientationFeatures)(rigid::Rigid)
-    points1 = rigid * rof.FA
-    points2 = rigid * rof.FB
-    diffs = unsqueeze(points1, dims=4) .- unsqueeze(points2, dims=3)
-    return dropdims(sqrt.(sum(abs2, diffs; dims=1)); dims=1)
+_rof(rof::RandomOrientationFeatures, T1::Rigid, T2::Rigid) = norms(T1(rof.FA) .- T2(rof.FB); dims=1)
+
+function (rof::RandomOrientationFeatures)(T1::Rigid, T2::Rigid; pairdim::Union{Nothing,Int}=nothing)
+    if dims isa Int
+        T1, T2 = batchunsqueeze(T1, dims=pairdim+1), batchunsqueeze(T2, dims=pairdim)
+    end
+    _rof(rof, T1, T2)
 end
 
-(rof::RandomOrientationFeatures)((R, t)::Tuple{AbstractArray,AbstractArray}, args...) = rof(construct_rigid(R, t), args...) 
+(rof::RandomOrientationFeatures)(T; kwargs...) = rof(T, T; kwargs...)
+
+
+rand_rigid(T::Type, batch_size::Dims) = rand(T, Rigid, 3, batch_size)
+
+"""
+    get_rigid(R::AbstractArray, t::AbstractArray)
+
+Converts a rotation `R` and translation `t` to a `BatchedTransformations.Rigid`, designed to
+handle batch dimensions.
+
+The transformation gets applied according to `NNlib.batched_mul(R,  x) .+ t`
+"""
+function get_rigid(R::AbstractArray, t::AbstractArray)
+    batch_size = size(R)[3:end]
+    t = reshape(t, 3, 1, batch_size...)
+    Translation(t) ∘ Rotation(R)
+end
+
+(rof::RandomOrientationFeatures)(T1::Tuple, T2::Tuple, args...; kwargs...) =
+    rof(get_rigid(T1...), get_rigid(T2...), args...; kwargs...)
 
 end
