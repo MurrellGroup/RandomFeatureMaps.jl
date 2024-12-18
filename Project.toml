@@ -1,7 +1,7 @@
 name = "RandomFeatureMaps"
 uuid = "780baa95-dd42-481b-93db-80fe3d88832c"
 authors = ["murrellb <murrellb@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 BatchedTransformations = "8ba27c4b-52b5-4b10-bc66-a4fda05aa11b"
@@ -16,10 +16,10 @@ GraphNeuralNetworksExt = "GraphNeuralNetworks"
 
 [compat]
 BatchedTransformations = "0.5"
-Functors = "0.4"
+Functors = "0.4, 0.5"
 GraphNeuralNetworks = "0.6"
-Optimisers = "0.3"
-julia = "1.9"
+Optimisers = "0.3, 0.4"
+julia = "1.10"
 
 [extras]
 GraphNeuralNetworks = "cffab07f-9bc2-4db1-8861-388f63bf7694"
