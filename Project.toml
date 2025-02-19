@@ -1,7 +1,7 @@
 name = "RandomFeatureMaps"
 uuid = "780baa95-dd42-481b-93db-80fe3d88832c"
 authors = ["murrellb <murrellb@gmail.com> and contributors"]
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 BatchedTransformations = "8ba27c4b-52b5-4b10-bc66-a4fda05aa11b"
