@@ -4,9 +4,7 @@ export RandomFourierFeatures
 export RandomOrientationFeatures
 export rand_rigid, get_rigid
 
-using Functors: @functor
-import Optimisers
-
+using Flux
 using BatchedTransformations
 
 sumdrop(f, A::AbstractArray; dims) = dropdims(sum(f, A; dims); dims)
@@ -35,8 +33,7 @@ struct RandomFourierFeatures{T<:Real,A<:AbstractMatrix{T}}
     W::A
 end
 
-@functor RandomFourierFeatures
-Optimisers.trainable(::RandomFourierFeatures) = (;)  # no trainable parameters
+Flux.@layer RandomFourierFeatures trainable=()
 
 RandomFourierFeatures(dims::Pair{<:Integer, <:Integer}, σ::Real) = RandomFourierFeatures(dims, float(σ))
 
@@ -115,8 +112,7 @@ struct RandomOrientationFeatures{A<:AbstractArray{<:Real}}
     FB::A
 end
 
-@functor RandomOrientationFeatures
-Optimisers.trainable(::RandomOrientationFeatures) = (;)  # no trainable parameters
+Flux.@layer RandomOrientationFeatures trainable=()
 
 """
     RandomOrientationFeatures(m, σ)
@@ -151,8 +147,7 @@ handle batch dimensions.
 The transformation gets applied according to `NNlib.batched_mul(R,  x) .+ t`
 """
 function get_rigid(R::AbstractArray, t::AbstractArray)
-    batch_size = size(R)[3:end]
-    t = reshape(t, 3, 1, batch_size...)
+    t = reshape(t, 3, 1, size(R)[3:end]...)
     Translation(t) ∘ Rotation(R)
 end
 
