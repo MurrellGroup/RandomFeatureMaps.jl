@@ -2,13 +2,77 @@ module RandomFeatureMaps
 
 export RandomFourierFeatures
 export RandomOrientationFeatures
-export rand_rigid, get_rigid
+export RandomTriangleFeatures
+export rand_rigid, get_rigid, trianglecos, trianglesin
 
 using Flux
 using BatchedTransformations
+using ChainRulesCore
 
 sumdrop(f, A::AbstractArray; dims) = dropdims(sum(f, A; dims); dims)
 norms(A::AbstractArray; dims) = sqrt.(sumdrop(abs2, A; dims))
+
+trianglecos(x::T) where T = T(2abs(mod(x, 2)-1)-1)
+dtrianglecos(x::T) where T = mod(x, 2) < 1 ? T(-2) : T(2)
+trianglesin(x::T) where T = trianglecos(x-0.5)
+
+trianglecos(x::AbstractArray{T}) where T = @. 2abs(mod(x, 2)-1)-1
+trianglesin(x::AbstractArray{T}) where T = trianglecos(x .- T(0.5))
+
+function ChainRulesCore.rrule(::typeof(trianglecos), x::AbstractArray{T}) where {T}
+    y = trianglecos(x)
+    function trianglecos_pullback(ȳ)
+        x̄ = ȳ .* dtrianglecos.(x)
+        return NoTangent(), x̄
+    end
+    return y, trianglecos_pullback
+end
+
+"""
+    RandomFourierFeatures(n => m, σ)
+
+Maps `n`-dimensional data and projects it to `m`-dimensional random fourier features.
+
+This type has no trainable parameters.
+
+## Examples
+
+```jldoctest
+julia> rff = RandomFourierFeatures(2 => 4, 1.0); # maps 2D data to 4D
+
+julia> rff(rand(2, 3)) |> size # 3 samples
+(4, 3)
+
+julia> rff(rand(2, 3, 5)) |> size # extra batch dim
+(4, 3, 5)
+```
+"""
+struct RandomTriangleFeatures{T<:Real,A<:AbstractMatrix{T}}
+    W::A
+end
+
+Flux.@layer RandomTriangleFeatures trainable=()
+
+RandomTriangleFeatures(dims::Pair{<:Integer, <:Integer}, σ::Real) = RandomTriangleFeatures(dims, float(σ))
+
+# d1: input dimension, d2: output dimension (d1 => d2)
+function RandomTriangleFeatures((d1, d2)::Pair{<:Integer, <:Integer}, σ::AbstractFloat)
+    iseven(d2) || throw(ArgumentError("dimension must be even"))
+    isfinite(σ) && σ > 0 || throw(ArgumentError("scale must be finite and positive"))
+    return RandomTriangleFeatures(randn(typeof(σ), d1, d2 ÷ 2) * σ * oftype(σ, 2π))
+end
+
+function (rff::RandomTriangleFeatures{T})(X::AbstractMatrix{T}) where T<:Real
+    Y = rff.W'X
+    return [trianglecos(Y); trianglesin(Y)]
+end
+
+function (rff::RandomTriangleFeatures{T})(X::AbstractArray{T}) where T<:Real
+    X′ = reshape(X, size(X, 1), :)
+    Y′ = rff(X′)
+    Y = reshape(Y′, :, size(X)[2:end]...)
+    return Y
+end
 
 """
     RandomFourierFeatures(n => m, σ)

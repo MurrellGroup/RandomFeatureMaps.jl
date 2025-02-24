@@ -5,6 +5,13 @@ using BatchedTransformations
 
 @testset "RandomFeatureMaps.jl" begin
 
+    @testset "RandomTriangleFeatures" begin
+        rff = RandomTriangleFeatures(10 => 20, 0.1f0)
+        x = randn(Float32, 10, 4)
+        @test rff(x) |> size == (20, 4)
+        @test rff(reshape(x, 10, 2, 2)) |> size == (20, 2, 2)
+    end
+
     @testset "RandomFourierFeatures" begin
         rff = RandomFourierFeatures(10 => 20, 0.1f0)
         x = randn(Float32, 10, 4)
