@@ -1,7 +1,7 @@
 name = "RandomFeatureMaps"
 uuid = "780baa95-dd42-481b-93db-80fe3d88832c"
 authors = ["murrellb <murrellb@gmail.com> and contributors"]
-version = "0.2.2"
+version = "0.2.3"
 
 [deps]
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
