@@ -218,4 +218,65 @@ end
 (rof::RandomOrientationFeatures)(T1::Tuple, T2::Tuple, args...; kwargs...) =
     rof(get_rigid(T1...), get_rigid(T2...), args...; kwargs...)
 
+
+
+
+"""
+    TrainableRBF(n => m, [σ])
+
+Maps `n`-dimensional data to `m` Gaussian radial basis responses with trainable
+centers and isotropic radii per basis.
+
+The optional `σ` controls the initialization scale and element type.
+
+Examples
+
+```jldoctest
+julia> rbf = TrainableRBF(2 => 4, 1.0); # 4 bases in 2D
+
+julia> rbf(rand(2, 3)) |> size # 3 samples
+(4, 3)
+
+julia> rbf(rand(2, 3, 5)) |> size # extra batch dim
+(4, 3, 5)
+```
+"""
+struct TrainableRBF{T<:Real, A<:AbstractMatrix{T}, V<:AbstractVector{T}}
+    centers::A  # (n, m)
+    radii::V    # (m,) isotropic per basis
+end
+
+Flux.@layer TrainableRBF trainable=(centers, radii)
+
+TrainableRBF(dims::Pair{<:Integer, <:Integer}, σ::Real=1.0) = TrainableRBF(dims, float(σ))
+
+function TrainableRBF((d1, d2)::Pair{<:Integer, <:Integer}, σ::AbstractFloat)
+    isfinite(σ) || throw(ArgumentError("scale must be finite"))
+    centers = randn(typeof(σ), d1, d2) * σ
+    radii = fill(typeof(σ)(1), d2)
+    return TrainableRBF(centers, radii)
+end
+
+function (rbf::TrainableRBF{T})(X::AbstractMatrix{T}) where T<:Real
+    C = rbf.centers
+    R = rbf.radii
+    X2 = sum(abs2, X; dims = 1)                 # (1, N)
+    C2 = sum(abs2, C; dims = 1)                 # (1, M)
+    D2 = (-2 .* (C' * X)) .+ C2' .+ X2          # (M, N)
+    σ = softplus.(R) .+ T(1e-6)
+    denom = 2 .* reshape(σ .^ 2, :, 1)          # (M, 1)
+    return exp.(-D2 ./ denom)                   # (M, N)
+end
+
+function (rbf::TrainableRBF{T})(X::AbstractArray{T}) where T<:Real
+    X′ = reshape(X, size(X, 1), :)
+    Y′ = rbf(X′)
+    return reshape(Y′, :, size(X)[2:end]...)
+end
+
+export TrainableRBF
+
+
+
+
 end
