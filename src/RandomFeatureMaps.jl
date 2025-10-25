@@ -3,6 +3,7 @@ module RandomFeatureMaps
 export RandomFourierFeatures
 export RandomOrientationFeatures
 export RandomTriangleFeatures
+export TrainableRBF
 export rand_rigid, get_rigid, trianglecos, trianglesin
 
 using Flux
@@ -273,10 +274,5 @@ function (rbf::TrainableRBF{T})(X::AbstractArray{T}) where T<:Real
     Y′ = rbf(X′)
     return reshape(Y′, :, size(X)[2:end]...)
 end
-
-export TrainableRBF
-
-
-
 
 end
